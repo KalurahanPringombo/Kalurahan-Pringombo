@@ -1,0 +1,129 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("PRINGOMBO_DB_PRISMA_URL")
+  directUrl = env("PRINGOMBO_DB_URL_NON_POOLING")
+}
+
+model User {
+  id            String    @id @default(uuid())
+  name          String?
+  email         String    @unique
+  password      String
+  emailVerified DateTime?
+}
+
+model VerificationToken {
+  id      String   @id @default(cuid())
+  email   String
+  token   String   @unique
+  expires DateTime
+
+  @@unique([email, token])
+}
+
+model PasswordResetToken {
+  id      String   @id @default(cuid())
+  email   String
+  token   String   @unique
+  expires DateTime
+
+  @@unique([email, token])
+}
+
+model Penduduk {
+  nik                  String          @id
+  nokk                 String?
+  nama                 String
+  alias                String?
+  agama                String?
+  jenis_kelamin        String?
+  kewarganegaraan      String          @default("indonesia")
+  padukuhan            String?
+  rt                   Int?
+  rw                   Int?
+  pendidikan_kk        String?
+  pendidikan_sdt       String?
+  pekerjaan            String?
+  tanggal_lahir        DateTime?
+  tempat_lahir         String?
+  umur                 Int?
+  status_kawin         String?
+  shdk                 String?
+  gol_darah            String?
+  nama_ayah            String?
+  nama_ibu             String?
+  jabatan_di_kalurahan String          @default("penduduk")
+  status_duk           String?
+  image_url            String?
+  pengantar_skck       PengantarSKCK?
+  SuketUsaha           SuketUsaha[]
+  sktm                 SKTM[]
+  suket_kematian       SuketKematian?
+  IzinKeramaian        IzinKeramaian[]
+}
+
+model PengantarSKCK {
+  no_surat   String   @id
+  pendudukId String   @unique
+  penduduk   Penduduk @relation(fields: [pendudukId], references: [nik])
+  keperluan  String?
+  doc_id     String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model SuketUsaha {
+  no_surat        String   @id
+  usaha_sampingan String?
+  di_kalurahan    String?
+  di_kapanewon    String?
+  di_kabupaten    String?
+  doc_id          String?
+  pendudukId      String
+  penduduk        Penduduk @relation(fields: [pendudukId], references: [nik])
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model SKTM {
+  no_surat       String   @id
+  nik_ortu       String
+  nik_anak       String
+  penduduk       Penduduk @relation(fields: [nik_ortu], references: [nik])
+  nama_instansi  String?
+  fakultas_prodi String?
+  kelas_semester Int?
+  doc_id         String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model SuketKematian {
+  no_surat         String    @id
+  pendudukId       String    @unique
+  penduduk         Penduduk  @relation(fields: [pendudukId], references: [nik])
+  lokasi_meninggal String?
+  tanggal_kematian DateTime?
+  anak_ke          Int?
+  doc_id           String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+}
+
+model IzinKeramaian {
+  no_surat            String    @id
+  pendudukId          String
+  jenis_keramaian     String?
+  keperluan_keramaian String?
+  tempat_keramaian    String?
+  waktu_keramaian     DateTime?
+  lama_keramaian      String?
+  doc_id              String?
+  penduduk            Penduduk  @relation(fields: [pendudukId], references: [nik])
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+}
